@@ -21,7 +21,6 @@ async def on_ready():
 @bot.command()
 async def RENT_COST(ctx, *):
     try:
-        # Split the input into name and SCU quantity
         parts = name_and_scu.rsplit(' ', 1)
         if len(parts) != 1:
             await ctx.send("Invalid format. Use: `!RENT_COST <Ship Name>`")
