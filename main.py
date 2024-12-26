@@ -19,7 +19,7 @@ async def on_ready():
     print('------')
 
 @bot.command()
-async def RENT_COST(ctx, *):
+async def RENT_COST(ctx, *, ship_name: str):
     try:
         parts = name_and_scu.rsplit(' ', 1)
         if len(parts) != 1:
