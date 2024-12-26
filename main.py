@@ -21,7 +21,7 @@ async def on_ready():
 @bot.command()
 async def RENT_COST(ctx, *, ship_name: str):
     try:
-        parts = name_and_scu.rsplit(' ', 1)
+        parts = ship_name.split(' ')
         if len(parts) != 1:
             await ctx.send("Invalid format. Use: `!RENT_COST <Ship Name>`")
             return
@@ -45,8 +45,8 @@ async def RENT_COST(ctx, *, ship_name: str):
                         terminal = item.get("terminal_name")
                         break
 
-                await ctx.send(f"The Rental Price is {rent_price}")
-                await ctx.send(f"The Terminal Name is {terminal}")
+                await ctx.send(f"The Rental Price is: {rent_price}")
+                await ctx.send(f"The Terminal Name is: {terminal}")
             except json.JSONDecodeError:
                 await ctx.send("Error: The API response is not in the expected JSON format.")
         elif response.status_code == 401:
