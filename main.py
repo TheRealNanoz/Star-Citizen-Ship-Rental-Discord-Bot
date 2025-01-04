@@ -112,7 +112,7 @@ async def on_ready():
 async def RENT_COST(ctx, *, ship_name: str):
     try:
         ShipName = ship_name
-        ship_url = "https://uexcorp.space/api/2.0/vehicles_rentals_prices_all"
+        ship_url = "https://api.uexcorp.space/2.0/vehicles_rentals_prices_all"
         headers = {'Content-Type': 'application/json'}
 
         response = requests.get(ship_url, headers=headers)
@@ -174,7 +174,7 @@ async def RENT_COST(ctx, *, ship_name: str):
 @bot.command()
 async def RENT_LIST(ctx):
     try:
-        ship_url = "https://uexcorp.space/api/2.0/vehicles_rentals_prices_all"
+        ship_url = "https://api.uexcorp.space/2.0/vehicles_rentals_prices_all"
         headers = {'Content-Type': 'application/json'}
         response = requests.get(ship_url, headers=headers)
         if response.status_code == 200:
