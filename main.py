@@ -13,7 +13,7 @@ intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 # API key and bot token
-bot_token = #''
+bot_token = ''
 
 
 from html import unescape  # For decoding &quot; and other HTML entities
@@ -145,7 +145,7 @@ async def RENT_COST(ctx, *, ship_name: str):
 
                         # Send a response with the vehicle's details
                         embed = discord.Embed(title=f"Vehicle: {ShipName}")
-                        embed.add_field(name="Rental Price", value=f"{rent_price:,} aUEC")
+                        embed.add_field(name="Rental Price", value=f"{int(rent_price):,} aUEC")
                         embed.add_field(name="Terminal", value=terminal)
                         
                         # If we found an image URL, add it to the embed
@@ -191,7 +191,7 @@ async def RENT_LIST(ctx):
                     if item.get("vehicle_name") in shown_vehicles:
                         continue
                     shown_vehicles.add(item.get("vehicle_name"))
-                    await ctx.send(f"- {item.get("vehicle_name")}: **{item.get("price_rent"):,}** aUEC ")
+                    await ctx.send(f"- {item.get("vehicle_name")}: **{int(item.get("price_rent")):,}** aUEC ")
             except json.JSONDecodeError:
                 await ctx.send("Error: The API response is not in the expected JSON format.")
         elif response.status_code == 401:
