@@ -64,52 +64,6 @@ async def on_ready():
     print(f'Logged in as {bot.user.name} ({bot.user.id})')
     print('------')
 
-#@bot.command()
-#async def RENT_COST(ctx, *, ship_name: str):
-#    try:
-#
-#        ShipName = ship_name
-#        ship_url = "https://uexcorp.space/api/2.0/vehicles_rentals_prices_all"
-#        headers = {'Content-Type': 'application/json'}
-#
-#        response = requests.get(ship_url, headers=headers)
-#        if response.status_code == 200:
-#            try:
-#                data = response.json()
-#
-#                if 'data' not in data or not data['data']:
-#                    await ctx.send("No data found!")
-#                    return
-#                shipFound = False
-#                for item in data['data']:
-#                    if (item.get("vehicle_name")).upper() == ShipName.upper():
-#                        rent_price = item.get("price_rent")
-#                        terminal = item.get("terminal_name")
-#                        shipFound = True # so that we can determine whether or not to respond with no ship found later
-#                        image_url = get_vehicle_image(ShipName)
-#                        if image_url:
-#                            # Ensure the URL is properly formatted and a valid image URL
-#                            await ctx.send(f"Here is the image of the vehicle: {image_url}")
-#                        else:
-#                            await ctx.send(f"Could not find an image for the vehicle: {ShipName}")
-#
-#
-#                        break
-#                if (shipFound == False): # will not run if the shipFound is true.. therefore acts as an error response
-#                    await ctx.send(f"Error: There as no ship located in the UEX rental database with the name {ShipName}")
-#
-#                await ctx.send(f"The Rental Price is: {rent_price}")
-#                await ctx.send(f"The Terminal Name is: {terminal}")
-#            except json.JSONDecodeError:
-#                await ctx.send("Error: The API response is not in the expected JSON format.")
-#        elif response.status_code == 401:
-#            await ctx.send("Error: Unauthorized access. Check your API key.")
-#        else:
-#            await ctx.send(f"Error: Failed to retrieve data. Status code: {response.status_code}")
-#            await ctx.send(f"Error details: {response.text}")
-#    except Exception as e:
-#        await ctx.send(f"Error: {e}")
-
 
 @bot.command()
 async def RENT_COST(ctx, *, ship_name: str):
