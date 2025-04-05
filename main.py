@@ -210,7 +210,6 @@ if bot_token == '':
     user_response = int(input("Enter (1-2): "))
     if user_response == 1:
         bot_token = input("Copy and paste your bot token here: ")
-        print(f"Bot token is:{bot_token}")
     elif user_response == 2:
         print("Ending program! please modify bot_token variable in main.py!")
         exit()
