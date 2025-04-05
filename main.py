@@ -6,6 +6,7 @@ import os
 import asyncio
 from bs4 import BeautifulSoup
 import html
+from getpass import getpass
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -209,7 +210,7 @@ if bot_token == '':
     print("2. modify the locally saved code to permanently store bot token")
     user_response = int(input("Enter (1-2): "))
     if user_response == 1:
-        bot_token = input("Copy and paste your bot token here: ")
+        bot_token = getpass("Copy and paste your bot token here: ")
     elif user_response == 2:
         print("Ending program! please modify bot_token variable in main.py!")
         exit()
