@@ -7,6 +7,8 @@ import asyncio
 from bs4 import BeautifulSoup
 import html
 from getpass import getpass
+import io
+import aiohttp
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -171,6 +173,126 @@ async def RENT_COST(ctx, *, ship_name: str):
     except Exception as e:
         await ctx.send(f"Error: {e}")
 
+@bot.command() # mostly copied from RENT_COST as they are similar API's
+async def BUY_COST(ctx, *, ship_name: str):
+    try:
+        ShipName = ship_name
+        ship_url = "https://api.uexcorp.space/2.0/vehicles_purchases_prices_all"
+        ship_url_2 = "https://api.uexcorp.space/2.0/vehicles_prices"
+        headers = {'Content-Type': 'application/json'}
+
+        response = requests.get(ship_url, headers=headers)
+        response2 = requests.get(ship_url_2, headers=headers)
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                if 'data' not in data or not data['data']:
+                    await ctx.send("No data found!")
+                    return
+                
+                shipFound = False
+                image_url = None  # Make sure image_url is initialized
+
+                # Loop over the vehicles in the response
+                for item in data['data']:
+                    if item.get("vehicle_name").upper() == ShipName.upper():
+                        buy_price = item.get("price_buy")
+                        terminal = item.get("terminal_name")
+                        shipFound = True
+                        
+                        # Attempt to get the image URL for the vehicle
+                        image_url = get_vehicle_image(ShipName)
+                        
+                        if image_url:
+                            print(f"Found image URL: {image_url}")  # Debugging: Ensure the image URL is found
+                        else:
+                            print("Could not find an image for the vehicle")  # Debugging: Log if no image is found
+
+                        ## Send a response with the vehicle's details
+                        #embed = discord.Embed(title=f"Vehicle: {ShipName}")
+                        #embed.add_field(name="Purchase Price", value=f"{int(buy_price):,} aUEC")
+                        #embed.add_field(name="Terminal", value=terminal)
+                        
+                        # If we found an image URL, add it to the embed
+                        if not image_url:
+                            #embed.set_image(url=image_url)
+                            print("No image to embed")  # Debugging: Log if no image is available
+                            break
+                        
+                        #await ctx.send(embed=embed)  # Send the embed message
+                        value1 = True
+                        break
+
+                # If no matching vehicle is found
+                if not shipFound:
+                    value1 = False
+                #    await ctx.send(f"Error: There is no ship located in the UEX ingame purchase database with the name {ShipName}")
+                    
+            except json.JSONDecodeError:
+                await ctx.send("Error: The API response is not in the expected JSON format.")
+        else:
+            await ctx.send(f"Error: Failed to retrieve data. Status code: {response.status_code}")
+            await ctx.send(f"Error details: {response.text}")
+        ###
+        if response2.status_code == 200:
+            try:
+                data2 = response2.json()
+                if 'data' not in data2 or not data2['data']:
+                    await ctx.send("No data found!")
+                    return
+                
+                shipFound2 = False
+                image_url2 = None  # Make sure image_url is initialized
+
+                # Loop over the vehicles in the response
+                for item in data2['data']:
+                    if item.get("vehicle_name").upper() == ShipName.upper():
+                        price = item.get("price")
+                        shipFound = True
+                        value2 = True
+                        break
+                # If no matching vehicle is found
+                if not shipFound:
+                    value2 = False
+                #    await ctx.send(f"Error: There is no ship located in the UEX purchase database with the name {ShipName}")
+                    
+            except json.JSONDecodeError:
+                await ctx.send("Error: The API response is not in the expected JSON format.")
+        else:
+            await ctx.send(f"Error: Failed to retrieve data. Status code: {response.status_code}")
+            await ctx.send(f"Error details: {response.text}")
+        ###
+
+
+
+        if (value1 == True) and (value2 == True):
+            embed = discord.Embed(title=f"Vehicle: {ShipName}")
+            embed.add_field(name="Purchase Price", value=f"{int(buy_price):,} aUEC")
+            embed.add_field(name="Real Price (USD)", value=f"${int(price):,}")
+            embed.add_field(name="Terminal", value=terminal)
+            embed.set_image(url=image_url)
+            await ctx.send(embed=embed)
+        elif (value1 == True) and (value2 != True):
+            embed = discord.Embed(title=f"Vehicle: {ShipName}")
+            embed.add_field(name="Purchase Price", value=f"{int(buy_price):,} aUEC")
+            embed.add_field(name="Terminal", value=terminal)
+            embed.set_image(url=image_url)
+            await ctx.send(embed=embed)
+        elif (value1 != True) and (value2 == True):
+            embed = discord.Embed(title=f"Vehicle: {ShipName}")
+            embed.add_field(name="Purchase Price", value="N/A")
+            embed.add_field(name="Real Price (USD)", value=f"${int(price):,}")
+            embed.set_image(url=image_url)
+            await ctx.send(embed=embed)
+        else:
+            await ctx.send("An error occurred in field generation")
+
+
+
+        ###
+    except Exception as e:
+        await ctx.send(f"Error: {e}")
 
 @bot.command()
 async def RENT_LIST(ctx):
