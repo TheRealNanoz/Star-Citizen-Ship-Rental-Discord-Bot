@@ -14,20 +14,16 @@ import aiohttp
 intents = discord.Intents.default()
 intents.message_content = True
 
+######################### Enter Values Here ###############################
+
+# bot token and guild ID
+guild_id =  # Enter guild id number here
+bot_token = ''
+
+######################### Enter Values Here ###############################
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 MY_GUILD = discord.Object(id=guild_id)
-
-
-
-
-
-# bot token and guild ID
-bot_token = ''
-guild_id = #enter number here
-
-
-
 
 
 from html import unescape  # For decoding &quot; and other HTML entities
