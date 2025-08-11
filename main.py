@@ -269,10 +269,11 @@ async def RENT_LIST(interaction: discord.Interaction):
                 if 'data' not in data or not data['data']:
                     await interaction.response.send_message("No data found!")
                     return
-                await interaction.response.send_message("# List Of Vehicle Prices")
-                await interaction.followup.send("### VehicleName | Rent (1 day)")
-                shown_vehicles = set()
                 vehicle_lines = []
+                vehicle_lines.append("# List Of Vehicle Prices")
+                vehicle_lines.append("### VehicleName | Rent (1 day)")
+                shown_vehicles = set()
+                
                 for item in data['data']:
                     if item.get("vehicle_name") in shown_vehicles:
                         continue
