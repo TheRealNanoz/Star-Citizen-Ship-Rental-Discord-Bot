@@ -270,13 +270,13 @@ async def RENT_LIST(interaction: discord.Interaction):
                     await interaction.response.send_message("No data found!")
                     return
                 await interaction.response.send_message("# List Of Vehicle Prices")
-                await interaction.response.send_message("### VehicleName | Rent (1 day)")
+                await interaction.followup.send("### VehicleName | Rent (1 day)")
                 shown_vehicles = set()
                 for item in data['data']:
                     if item.get("vehicle_name") in shown_vehicles:
                         continue
                     shown_vehicles.add(item.get("vehicle_name"))
-                    await interaction.response.send_message(f"- {item.get("vehicle_name")}: **{int(item.get("price_rent")):,}** aUEC ")
+                    await interaction.followup.send(f"- {item.get("vehicle_name")}: **{int(item.get("price_rent")):,}** aUEC ")
             except json.JSONDecodeError:
                 await interaction.response.send_message("Error: The API response is not in the expected JSON format.")
         elif response.status_code == 401:
