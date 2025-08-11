@@ -280,7 +280,7 @@ async def RENT_LIST(interaction: discord.Interaction):
                     shown_vehicles.add(item.get("vehicle_name"))
                     vehicle_lines.append(f"- {item.get("vehicle_name")}: **{int(item.get("price_rent")):,}** aUEC ")
                 listmsg = "\n".join(vehicle_lines)
-                await interaction.followup.send(listmsg)
+                await interaction.response.send_message(listmsg)
             except json.JSONDecodeError:
                 await interaction.response.send_message("Error: The API response is not in the expected JSON format.")
         elif response.status_code == 401:
