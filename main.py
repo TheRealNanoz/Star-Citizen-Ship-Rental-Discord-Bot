@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord import app_commands
 import requests
 import json
 import os
@@ -13,10 +14,41 @@ import aiohttp
 intents = discord.Intents.default()
 intents.message_content = True
 
-bot = commands.Bot(command_prefix='!', intents=intents)
+######################### Enter Values Here ###############################
 
-# API key and bot token
+# bot token and guild ID
+guild_id = None # Enter Server id number here
 bot_token = ''
+
+######################### Enter Values Here ###############################
+
+
+if bot_token == '':
+    print("Cannot run bot without a token: ")
+    print("Do you wish to either:")
+    print("1. input the bot token for this session only")
+    print("2. modify bot_token in main.py to permanently store the bot token")
+    user_response = int(input("Enter (1, 2): "))
+    if user_response == 1:
+        bot_token = getpass("Copy and paste your bot token here: ")
+    elif user_response == 2:
+        print("Ending program! please modify bot_token variable in main.py!")
+        exit()
+if guild_id == None:
+    print("Cannot run bot without server ID")
+    print("Do you wish to either:")
+    print("1. input the Server ID for this session only")
+    print("2. modify guild_id in main.py to permanently store the server ID")
+    user_response = int(input("Enter (1, 2): "))
+    if user_response == 1:
+        guild_id = getpass("Copy and paste your server ID here: ")
+    elif user_response == 2:
+        print("Ending program! please modify guild_id variable in main.py!")
+        exit()
+
+
+bot = commands.Bot(command_prefix='!', intents=intents)
+MY_GUILD = discord.Object(id=guild_id)
 
 
 from html import unescape  # For decoding &quot; and other HTML entities
@@ -61,12 +93,13 @@ def get_vehicle_image(vehicle_name_partial):
 
 @bot.event
 async def on_ready():
+    await bot.tree.sync(guild=MY_GUILD)
     print(f'Logged in as {bot.user.name} ({bot.user.id})')
     print('------')
 
 
-@bot.command()
-async def RENT_COST(ctx, *, ship_name: str):
+@bot.tree.command(name = "rent_cost", description = "This displayes rent for a ship or vehicle", guild=MY_GUILD)
+async def RENT_COST(interaction: discord.Interaction, ship_name: str):
     try:
         ShipName = ship_name
         ship_url = "https://api.uexcorp.space/2.0/vehicles_rentals_prices_all"
@@ -79,7 +112,7 @@ async def RENT_COST(ctx, *, ship_name: str):
                 data = response.json()
 
                 if 'data' not in data or not data['data']:
-                    await ctx.send("No data found!")
+                    await interaction.response.send_message("No data found!")
                     return
                 
                 shipFound = False
@@ -111,24 +144,24 @@ async def RENT_COST(ctx, *, ship_name: str):
                         else:
                             print("No image to embed")  # Debugging: Log if no image is available
                         
-                        await ctx.send(embed=embed)  # Send the embed message
+                        await interaction.response.send_message(embed=embed)  # Send the embed message
                         break
 
                 # If no matching vehicle is found
                 if not shipFound:
-                    await ctx.send(f"Error: There is no ship located in the UEX rental database with the name {ShipName}")
+                    await interaction.response.send_message(f"Error: There is no ship located in the UEX rental database with the name {ShipName}")
                     
             except json.JSONDecodeError:
-                await ctx.send("Error: The API response is not in the expected JSON format.")
+                await interaction.response.send_message("Error: The API response is not in the expected JSON format.")
         else:
-            await ctx.send(f"Error: Failed to retrieve data. Status code: {response.status_code}")
-            await ctx.send(f"Error details: {response.text}")
+            await interaction.response.send_message(f"Error: Failed to retrieve data. Status code: {response.status_code}")
+            await interaction.response.send_message(f"Error details: {response.text}")
             
     except Exception as e:
-        await ctx.send(f"Error: {e}")
+        await interaction.response.send_message(f"Error: {e}")
 
-@bot.command() # mostly copied from RENT_COST as they are similar API's
-async def BUY_COST(ctx, *, ship_name: str):
+@bot.tree.command(name="buy_cost", description = "this displays cost of a ship in aUEC and $", guild=MY_GUILD) # mostly copied from RENT_COST as they are similar API's
+async def BUY_COST(interaction: discord.Interaction, ship_name: str):
     try:
         ShipName = ship_name
         ship_url = "https://api.uexcorp.space/2.0/vehicles_purchases_prices_all"
@@ -142,7 +175,7 @@ async def BUY_COST(ctx, *, ship_name: str):
             try:
                 data = response.json()
                 if 'data' not in data or not data['data']:
-                    await ctx.send("No data found!")
+                    await interaction.response.send_message("No data found!")
                     return
                 
                 shipFound = False
@@ -174,26 +207,26 @@ async def BUY_COST(ctx, *, ship_name: str):
                             print("No image to embed")  # Debugging: Log if no image is available
                             break
                         
-                        #await ctx.send(embed=embed)  # Send the embed message
+                        #await interaction.response.send_message(embed=embed)  # Send the embed message
                         value1 = True
                         break
 
                 # If no matching vehicle is found
                 if not shipFound:
                     value1 = False
-                #    await ctx.send(f"Error: There is no ship located in the UEX ingame purchase database with the name {ShipName}")
+                #    await interaction.response.send_message(f"Error: There is no ship located in the UEX ingame purchase database with the name {ShipName}")
                     
             except json.JSONDecodeError:
-                await ctx.send("Error: The API response is not in the expected JSON format.")
+                await interaction.response.send_message("Error: The API response is not in the expected JSON format.")
         else:
-            await ctx.send(f"Error: Failed to retrieve data. Status code: {response.status_code}")
-            await ctx.send(f"Error details: {response.text}")
+            await interaction.response.send_message(f"Error: Failed to retrieve data. Status code: {response.status_code}")
+            await interaction.response.send_message(f"Error details: {response.text}")
         ###
         if response2.status_code == 200:
             try:
                 data2 = response2.json()
                 if 'data' not in data2 or not data2['data']:
-                    await ctx.send("No data found!")
+                    await interaction.response.send_message("No data found!")
                     return
                 
                 shipFound2 = False
@@ -209,13 +242,13 @@ async def BUY_COST(ctx, *, ship_name: str):
                 # If no matching vehicle is found
                 if not shipFound:
                     value2 = False
-                #    await ctx.send(f"Error: There is no ship located in the UEX purchase database with the name {ShipName}")
+                #    await interaction.response.send_message(f"Error: There is no ship located in the UEX purchase database with the name {ShipName}")
                     
             except json.JSONDecodeError:
-                await ctx.send("Error: The API response is not in the expected JSON format.")
+                await interaction.response.send_message("Error: The API response is not in the expected JSON format.")
         else:
-            await ctx.send(f"Error: Failed to retrieve data. Status code: {response.status_code}")
-            await ctx.send(f"Error details: {response.text}")
+            await interaction.response.send_message(f"Error: Failed to retrieve data. Status code: {response.status_code}")
+            await interaction.response.send_message(f"Error details: {response.text}")
         ###
 
 
@@ -226,30 +259,30 @@ async def BUY_COST(ctx, *, ship_name: str):
             embed.add_field(name="Real Price (USD)", value=f"${int(price):,}")
             embed.add_field(name="Terminal", value=terminal)
             embed.set_image(url=image_url)
-            await ctx.send(embed=embed)
+            await interaction.response.send_message(embed=embed)
         elif (value1 == True) and (value2 != True):
             embed = discord.Embed(title=f"Vehicle: {ShipName}")
             embed.add_field(name="Purchase Price", value=f"{int(buy_price):,} aUEC")
             embed.add_field(name="Terminal", value=terminal)
             embed.set_image(url=image_url)
-            await ctx.send(embed=embed)
+            await interaction.response.send_message(embed=embed)
         elif (value1 != True) and (value2 == True):
             embed = discord.Embed(title=f"Vehicle: {ShipName}")
             embed.add_field(name="Purchase Price", value="N/A")
             embed.add_field(name="Real Price (USD)", value=f"${int(price):,}")
             embed.set_image(url=image_url)
-            await ctx.send(embed=embed)
+            await interaction.response.send_message(embed=embed)
         else:
-            await ctx.send("An error occurred in field generation")
+            await interaction.response.send_message("An error occurred in field generation")
 
 
 
         ###
     except Exception as e:
-        await ctx.send(f"Error: {e}")
+        await interaction.response.send_message(f"Error: {e}")
 
-@bot.command()
-async def RENT_LIST(ctx):
+@bot.tree.command(name = "rent_list", description = "provides a list of all rentable vehicles in game", guild=MY_GUILD)
+async def RENT_LIST(interaction: discord.Interaction):
     try:
         ship_url = "https://api.uexcorp.space/2.0/vehicles_rentals_prices_all"
         headers = {'Content-Type': 'application/json'}
@@ -259,35 +292,30 @@ async def RENT_LIST(ctx):
                 data = response.json()
 
                 if 'data' not in data or not data['data']:
-                    await ctx.send("No data found!")
+                    await interaction.response.send_message("No data found!")
                     return
-                await ctx.send("# List Of Vehicle Prices")
-                await ctx.send("### VehicleName | Rent (1 day)")
+                vehicle_lines = []
+                vehicle_lines.append("# List Of Vehicle Prices")
+                vehicle_lines.append("### VehicleName | Rent (1 day)")
                 shown_vehicles = set()
+                
                 for item in data['data']:
                     if item.get("vehicle_name") in shown_vehicles:
                         continue
                     shown_vehicles.add(item.get("vehicle_name"))
-                    await ctx.send(f"- {item.get("vehicle_name")}: **{int(item.get("price_rent")):,}** aUEC ")
+                    vehicle_lines.append(f"- {item.get("vehicle_name")}: **{int(item.get("price_rent")):,}** aUEC ")
+                listmsg = "\n".join(vehicle_lines)
+                await interaction.response.send_message(listmsg)
             except json.JSONDecodeError:
-                await ctx.send("Error: The API response is not in the expected JSON format.")
+                await interaction.response.send_message("Error: The API response is not in the expected JSON format.")
         elif response.status_code == 401:
-            await ctx.send("Error: Unauthorized access. Check your API key.")
+            await interaction.response.send_message("Error: Unauthorized access. Check your API key.")
         else:
-            await ctx.send(f"Error: Failed to retrieve data. Status code: {response.status_code}")
-            await ctx.send(f"Error details: {response.text}")
+            await interaction.response.send_message(f"Error: Failed to retrieve data. Status code: {response.status_code}")
+            await interaction.response.send_message(f"Error details: {response.text}")
     except Exception as e:
-        await ctx.send(f"Error: {e}")
+        await interaction.response.send_message(f"Error: {e}")
 
-if bot_token == '':
-    print("Cannot run bot without a token: ")
-    print("Do you wish to either:")
-    print("1. input the bot token for this session only")
-    print("2. modify the locally saved code to permanently store bot token")
-    user_response = int(input("Enter (1-2): "))
-    if user_response == 1:
-        bot_token = getpass("Copy and paste your bot token here: ")
-    elif user_response == 2:
-        print("Ending program! please modify bot_token variable in main.py!")
-        exit()
+
+
 bot.run(bot_token)
