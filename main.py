@@ -22,6 +22,31 @@ bot_token = ''
 
 ######################### Enter Values Here ###############################
 
+
+if bot_token == '':
+    print("Cannot run bot without a token: ")
+    print("Do you wish to either:")
+    print("1. input the bot token for this session only")
+    print("2. modify bot_token in main.py to permanently store the bot token")
+    user_response = int(input("Enter (1, 2): "))
+    if user_response == 1:
+        bot_token = getpass("Copy and paste your bot token here: ")
+    elif user_response == 2:
+        print("Ending program! please modify bot_token variable in main.py!")
+        exit()
+if guild_id == None:
+    print("Cannot run bot without server ID")
+    print("Do you wish to either:")
+    print("1. input the Server ID for this session only")
+    print("2. modify guild_id in main.py to permanently store the server ID")
+    user_response = int(input("Enter (1, 2): "))
+    if user_response == 1:
+        guild_id = getpass("Copy and paste your server ID here: ")
+    elif user_response == 2:
+        print("Ending program! please modify guild_id variable in main.py!")
+        exit()
+
+
 bot = commands.Bot(command_prefix='!', intents=intents)
 MY_GUILD = discord.Object(id=guild_id)
 
@@ -291,27 +316,6 @@ async def RENT_LIST(interaction: discord.Interaction):
     except Exception as e:
         await interaction.response.send_message(f"Error: {e}")
 
-if bot_token == '':
-    print("Cannot run bot without a token: ")
-    print("Do you wish to either:")
-    print("1. input the bot token for this session only")
-    print("2. modify bot_token in main.py to permanently store the bot token")
-    user_response = int(input("Enter (1, 2): "))
-    if user_response == 1:
-        bot_token = getpass("Copy and paste your bot token here: ")
-    elif user_response == 2:
-        print("Ending program! please modify bot_token variable in main.py!")
-        exit()
-if guild_id == None:
-    print("Cannot run bot without server ID")
-    print("Do you wish to either:")
-    print("1. input the Server ID for this session only")
-    print("2. modify guild_id in main.py to permanently store the server ID")
-    user_response = int(input("Enter (1, 2): "))
-    if user_response == 1:
-        guild_id = getpass("Copy and paste your server ID here: ")
-    elif user_response == 2:
-        print("Ending program! please modify guild_id variable in main.py!")
-        exit()
+
 
 bot.run(bot_token)
