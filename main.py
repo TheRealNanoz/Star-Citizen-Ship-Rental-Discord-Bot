@@ -302,7 +302,7 @@ if bot_token == '':
     elif user_response == 2:
         print("Ending program! please modify bot_token variable in main.py!")
         exit()
-if !guild_id:
+if guild_id == None:
     print("Cannot run bot without server ID")
     print("Do you wish to either:")
     print("1. input the Server ID for this session only")
