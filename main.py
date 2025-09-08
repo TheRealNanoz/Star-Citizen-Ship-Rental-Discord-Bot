@@ -53,42 +53,43 @@ MY_GUILD = discord.Object(id=guild_id)
 
 from html import unescape  # For decoding &quot; and other HTML entities
 
-def get_vehicle_image(vehicle_name_partial):
-    url = "https://uexcorp.space/vehicles/home"
-    response = requests.get(url)
-
-    if response.status_code != 200:
-        raise Exception(f"Failed to fetch the page: {response.status_code}")
-
-    # Parse the HTML content
-    soup = BeautifulSoup(response.content, 'html.parser')
-
-    # Find all vehicle divs
-    vehicle_divs = soup.find_all("div", class_="vehicle")
-    for vehicle_div in vehicle_divs:
-        # Get the full vehicle name from the "vehicle-name" attribute
-        full_vehicle_name = vehicle_div.get("vehicle-name", "")
-        if not full_vehicle_name:
-            continue
-
-        # Exclude the first word and check for a match
-        remaining_name = " ".join(full_vehicle_name.split()[1:])
-        if remaining_name.lower() == vehicle_name_partial.lower():
-            # Find the "photos" div within this vehicle div
-            photos_div = vehicle_div.find("div", class_="photos")
-            
-            if photos_div:
-                # Look for the image URL in the 'data-url' attribute
-                image_url = photos_div.get("data-url", "")
-                
-                if image_url:
-                    print(f"Extracted image URL: {image_url}")  # Debugging: Ensure the image URL is correctly extracted
-                    return image_url
-                else:
-                    print(f"No image URL found in the data-url attribute for {remaining_name}")
-    
-    # Return None if no match is found
-    return None
+#def get_vehicle_image(vehicle_name_partial):
+#    url = "https://uexcorp.space/vehicles/home"
+#   
+#    response = requests.get(url)
+#
+#    if response.status_code != 200:
+#        raise Exception(f"Failed to fetch the page: {response.status_code}, {response}")
+#
+#    # Parse the HTML content
+#    soup = BeautifulSoup(response.content, 'html.parser')
+#
+#    # Find all vehicle divs
+#    vehicle_divs = soup.find_all("div", class_="vehicle")
+#    for vehicle_div in vehicle_divs:
+#        # Get the full vehicle name from the "vehicle-name" attribute
+#        full_vehicle_name = vehicle_div.get("vehicle-name", "")
+#        if not full_vehicle_name:
+#            continue
+#
+#        # Exclude the first word and check for a match
+#        remaining_name = " ".join(full_vehicle_name.split()[1:])
+#        if remaining_name.lower() == vehicle_name_partial.lower():
+#            # Find the "photos" div within this vehicle div
+#            photos_div = vehicle_div.find("div", class_="photos")
+#            
+#            if photos_div:
+#                # Look for the image URL in the 'data-url' attribute
+#                image_url = photos_div.get("data-url", "")
+#                
+#                if image_url:
+#                    print(f"Extracted image URL: {image_url}")  # Debugging: Ensure the image URL is correctly extracted
+#                    return image_url
+#                else:
+#                    print(f"No image URL found in the data-url attribute for {remaining_name}")
+#    
+#    # Return None if no match is found
+#    return None
 
 
 @bot.event
@@ -103,6 +104,7 @@ async def RENT_COST(interaction: discord.Interaction, ship_name: str):
     try:
         ShipName = ship_name
         ship_url = "https://api.uexcorp.space/2.0/vehicles_rentals_prices_all"
+        image_urls = "https://api.uexcorp.uk/2.0/vehicles"
         headers = {'Content-Type': 'application/json'}
 
         response = requests.get(ship_url, headers=headers)
@@ -123,10 +125,11 @@ async def RENT_COST(interaction: discord.Interaction, ship_name: str):
                     if item.get("vehicle_name").upper() == ShipName.upper():
                         rent_price = item.get("price_rent")
                         terminal = item.get("terminal_name")
+                        image_url = item.get("url_photo")
                         shipFound = True
                         
                         # Attempt to get the image URL for the vehicle
-                        image_url = get_vehicle_image(ShipName)
+                        #image_url = get_vehicle_image(ShipName)
                         
                         if image_url:
                             print(f"Found image URL: {image_url}")  # Debugging: Ensure the image URL is found
@@ -162,14 +165,49 @@ async def RENT_COST(interaction: discord.Interaction, ship_name: str):
 
 @bot.tree.command(name="buy_cost", description = "this displays cost of a ship in aUEC and $", guild=MY_GUILD) # mostly copied from RENT_COST as they are similar API's
 async def BUY_COST(interaction: discord.Interaction, ship_name: str):
+    value1 = False
+    value2 = False
+
     try:
         ShipName = ship_name
         ship_url = "https://api.uexcorp.space/2.0/vehicles_purchases_prices_all"
         ship_url_2 = "https://api.uexcorp.space/2.0/vehicles_prices"
+        image_urls = "https://api.uexcorp.uk/2.0/vehicles"
         headers = {'Content-Type': 'application/json'}
 
         response = requests.get(ship_url, headers=headers)
         response2 = requests.get(ship_url_2, headers=headers)
+        image_response = requests.get(image_urls, headers=headers)
+
+        if image_response.status_code == 200:
+            try:
+                data = response.json()
+                if 'data' not in data or not data['data']:
+                    await interaction.response.send_message("No image data found!")
+                    return
+                shipImageFound = False
+                image_url = None  # Make sure image_url is initialized
+
+                for item in data['data']:
+                    if item.get("name").upper() == ShipName.upper():
+                        print("found vehicle")
+                        image_url = item.get("url_photo")
+                        print(f"{image_url}")
+
+                        if image_url:
+                            print(f"Found image URL: {image_url}")  # Debugging: Ensure the image URL is found
+                        else:
+                            print("Could not find an image for the vehicle")  # Debugging: Log if no image is found
+                        if not image_url:
+                            #embed.set_image(url=image_url)
+                            print("No image to embed")  # Debugging: Log if no image is available
+                            break
+            except json.JSONDecodeError:
+                await interaction.response.send_message("Error: The API response is not in the expected JSON format.")
+        else:
+            await interaction.response.send_message(f"Error: Failed to retrieve data. Status code: {response.status_code}")
+            await interaction.response.send_message(f"Error details: {response.text}")
+
         
         if response.status_code == 200:
             try:
@@ -179,7 +217,7 @@ async def BUY_COST(interaction: discord.Interaction, ship_name: str):
                     return
                 
                 shipFound = False
-                image_url = None  # Make sure image_url is initialized
+                
 
                 # Loop over the vehicles in the response
                 for item in data['data']:
@@ -189,12 +227,8 @@ async def BUY_COST(interaction: discord.Interaction, ship_name: str):
                         shipFound = True
                         
                         # Attempt to get the image URL for the vehicle
-                        image_url = get_vehicle_image(ShipName)
+                        #image_url = get_vehicle_image(ShipName)
                         
-                        if image_url:
-                            print(f"Found image URL: {image_url}")  # Debugging: Ensure the image URL is found
-                        else:
-                            print("Could not find an image for the vehicle")  # Debugging: Log if no image is found
 
                         ## Send a response with the vehicle's details
                         #embed = discord.Embed(title=f"Vehicle: {ShipName}")
@@ -202,10 +236,7 @@ async def BUY_COST(interaction: discord.Interaction, ship_name: str):
                         #embed.add_field(name="Terminal", value=terminal)
                         
                         # If we found an image URL, add it to the embed
-                        if not image_url:
-                            #embed.set_image(url=image_url)
-                            print("No image to embed")  # Debugging: Log if no image is available
-                            break
+
                         
                         #await interaction.response.send_message(embed=embed)  # Send the embed message
                         value1 = True
@@ -230,7 +261,7 @@ async def BUY_COST(interaction: discord.Interaction, ship_name: str):
                     return
                 
                 shipFound2 = False
-                image_url2 = None  # Make sure image_url is initialized
+
 
                 # Loop over the vehicles in the response
                 for item in data2['data']:
